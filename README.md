@@ -36,9 +36,9 @@ All heartbeats sent are printed to Godot output console. `OS.execute` do this by
 
 ## TODO
 
-- Download and extract wakatime-cli from their repo during plugin setup to remove clean out this repo.
+- Download and extract wakatime-cli from their repo during plugin setup.
+- Add more cmdline args like `--exclude`, `--lineno`, `--hidefilenames`, etc and let users change it.
 - Remove cmdline output on Windows.
-- Menu button to reopen modal to change API key.
 
 
 [Python]: <https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe>
