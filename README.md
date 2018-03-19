@@ -33,6 +33,9 @@ For Windows users:
 
 All heartbeats sent are printed to Godot output console. `OS.execute` do this by default and can't be disabled. **Be careful to not reveal your printed API key to anyone**.
 
+For now, [`pygments` doesn't support GDScript by default](https://bitbucket.org/birkenfeld/pygments-main/issues/1429/add-lexer-for-gdscript-from-godot-game). The workaround is to use a custom rule to force any files ending with `.gd` to be categorized as GDScript. (https://wakatime.com/settings/rules)
+
+
 
 ## TODO
 
