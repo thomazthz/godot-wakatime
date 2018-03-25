@@ -2,14 +2,16 @@ tool
 extends EditorPlugin
 
 const HeartBeat = preload('res://addons/wakatime/heartbeat.gd')
+const Settings = preload('res://addons/wakatime/settings.gd')
+const Utils = preload('res://addons/wakatime/utils.gd')
+
 var last_heartbeat = HeartBeat.new()
 
-var Utils = preload('res://addons/wakatime/utils.gd')
-
 var wakatime_cli = ProjectSettings.globalize_path(Utils.WAKATIME_CLI_PATH)
-var python = null
-var wakatime_api_key = null
+
 var api_key_modal = preload('res://addons/wakatime/api_key_modal.tscn')
+
+var settings = null
 
 
 func _enter_tree():
@@ -23,31 +25,29 @@ func _exit_tree():
 
 
 func _ready():
-	wakatime_api_key = Utils.load_settings('wakatime-api-key')
-	if not wakatime_api_key:
-		prompt_api_key()
+	# Load all settings from .cfg file
+	settings = Settings.new()
 
+	# Check python bin
+	if not settings.get(Settings.PYTHON_PATH):
+		var python = Utils.get_python_binary()
+		if python:
+			settings.save_setting(Settings.PYTHON_PATH, python)
+		else:
+			printerr('Python not found! Install Python from https://www.python.org/downloads/ and reload godot-wakatime plugin')
 
-func prompt_api_key():
-	var prompt = api_key_modal.instance()
-	prompt.connect('api_key_changed', self, '_on_api_key_changed')
-	add_child(prompt)
-	prompt.popup_centered()
+	# Check wakatime api key
+	if not settings.get(Settings.WAKATIME_API_KEY):
+		var prompt = api_key_modal.instance()
+		prompt.init(settings)
+		add_child(prompt)
+		prompt.popup_centered()
 
 
 func get_state():
-	if not python:
-		python = Utils.get_python_binary()
-	if not wakatime_api_key:
-		wakatime_api_key = Utils.load_settings('wakatime-api-key')
-	return {'python': python, 'wakatime-api-key': wakatime_api_key}
-
-
-func set_state(state):
-	if state.has('python'):
-		python = state['python']
-	if state.has('wakatime-api-key'):
-		wakatime_api_key = 'wakatime-api-key'
+	if not settings:
+		settings = Settings.new()
+	return {'settings': settings}
 
 
 func get_current_file():
@@ -55,7 +55,7 @@ func get_current_file():
 
 
 func handle_activity(file, is_write=false):
-	if not (file and python):
+	if not (file and settings.get(Settings.PYTHON_PATH)):
 		return
 
 	var filepath = ProjectSettings.globalize_path(file.resource_path)
@@ -65,6 +65,9 @@ func handle_activity(file, is_write=false):
 
 
 func send_heartbeat(filepath, is_write):
+	var python = settings.get(Settings.PYTHON_PATH)
+	var wakatime_api_key = settings.get(Settings.WAKATIME_API_KEY)
+
 	var heartbeat = HeartBeat.new(filepath, OS.get_unix_time(), is_write)
 	var cmd = [wakatime_cli,
 			   '--entity', heartbeat.filepath,
@@ -101,10 +104,6 @@ func _unhandled_key_input(ev):
 func save_external_data():
 	var file = get_current_file()
 	handle_activity(file, true)
-
-
-func _on_api_key_changed(new_api_key):
-	wakatime_api_key = new_api_key
 
 
 func get_user_agent():

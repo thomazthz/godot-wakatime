@@ -1,7 +1,8 @@
+tool
+
 const PLUGIN_PATH = 'res://addons/wakatime'
 const WAKATIME_CLI_ROOT_PATH = '%s/wakatime-cli-10.1.0' % PLUGIN_PATH
 const WAKATIME_CLI_PATH = '%s/wakatime/cli.py' % WAKATIME_CLI_ROOT_PATH
-const SETTINGS_FILE = '%s/settings.cfg' % PLUGIN_PATH
 
 const REG_PREFIX_KEYS = [
 	'HKEY_CURRENT_USER',
@@ -18,24 +19,6 @@ const REG_LOCATIONS = 'HKEY_CURRENT_USER'
 
 
 static func get_python_binary():
-	var bin = load_settings('python')
-
-	if bin and _check_python_bin(bin):
-		return bin
-
-	bin = _get_python_binary()
-
-	if bin:
-		save_settings('python', bin)
-		print('Python found: %s' % bin)
-		return bin
-
-	printerr('Python not found! Install Python from https://www.python.org/downloads/ and reload godot-wakatime plugin')
-
-	return null
-
-
-static func _get_python_binary():
 	var binary_path = null
 	var is_windows = OS.get_name() == 'Windows'
 	var paths = [
@@ -57,6 +40,9 @@ static func _get_python_binary():
 
 	if is_windows:
 		binary_path = _get_python_bin_from_windows_reg()
+
+	if binary_path:
+		print('Python found: %s' % binary_path)
 
 	return binary_path
 
@@ -150,20 +136,3 @@ static func _list_dir(path):
 		file_name = dir.get_next()
 
 	return result
-
-
-static func save_settings(key, value):
-	var config = ConfigFile.new()
-	config.load(SETTINGS_FILE)
-	config.set_value('godot-wakatime', key, value)
-	config.save(SETTINGS_FILE)
-
-
-static func load_settings(key):
-	var config = ConfigFile.new()
-	var err = config.load(SETTINGS_FILE)
-	var value = null
-	if err == OK:
-		if config.has_section_key('godot-wakatime', key):
-			value = config.get_value('godot-wakatime', key)
-	return value

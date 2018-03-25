@@ -1,13 +1,11 @@
 tool
 extends PopupDialog
 
-signal api_key_changed(api_key)
-
 onready var save_btn = $save_btn
 onready var cancel_btn = $cancel_btn
 onready var api_key_line_edit = $line_edit
 
-const Utils = preload('res://addons/wakatime/utils.gd')
+var curr_settings = null
 
 
 func _ready():
@@ -16,9 +14,12 @@ func _ready():
 	api_key_line_edit.connect('text_entered', self, '_on_confirm')
 
 
+func init(settings):
+	self.curr_settings = settings
+
+
 func _on_confirm(text=null):
-	Utils.save_settings('wakatime-api-key', api_key_line_edit.text)
-	emit_signal('api_key_changed', api_key_line_edit.text)
+	curr_settings.save_setting(curr_settings.WAKATIME_API_KEY, api_key_line_edit.text)
 	hide_popup()
 
 
