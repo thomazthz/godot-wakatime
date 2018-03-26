@@ -35,6 +35,7 @@ func _ready():
 			settings.save_setting(Settings.PYTHON_PATH, python)
 		else:
 			printerr('Python not found! Install Python from https://www.python.org/downloads/ and reload godot-wakatime plugin')
+			get_editor_interface().call_deferred('set_plugin_enabled', 'wakatime', false)
 
 	# Check wakatime api key
 	if not settings.get(Settings.WAKATIME_API_KEY):
