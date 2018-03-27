@@ -10,6 +10,7 @@ var last_heartbeat = HeartBeat.new()
 var wakatime_cli = ProjectSettings.globalize_path(Utils.WAKATIME_CLI_PATH)
 
 var api_key_modal = preload('res://addons/wakatime/api_key_modal.tscn')
+var bottom_panel = preload('res://addons/wakatime/bottom_panel.tscn')
 
 var settings = null
 
@@ -44,6 +45,10 @@ func _ready():
 		add_child(prompt)
 		prompt.popup_centered()
 
+	var panel = bottom_panel.instance()
+	panel.call_deferred('init', settings)
+	add_control_to_bottom_panel(panel, 'Wakatime')
+
 
 func get_state():
 	if not settings:
@@ -74,11 +79,17 @@ func send_heartbeat(filepath, is_write):
 			   '--entity', heartbeat.filepath,
 			   '--key', wakatime_api_key,
 			   '--time', heartbeat.timestamp,
-			   '--project', ProjectSettings.get('application/config/name'),
 			   '--plugin', get_user_agent()]
 
 	if is_write:
 		cmd.append('--write')
+
+	if not settings.get(Settings.HIDE_PROJECT_NAME):
+		cmd.append('--project')
+		cmd.append(ProjectSettings.get('application/config/name'))
+
+	if settings.get(Settings.HIDE_FILENAMES):
+		cmd.append('--hidefilenames')
 
 	var output = []
 	OS.execute(python, cmd, false, output)

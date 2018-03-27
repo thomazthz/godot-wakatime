@@ -3,14 +3,17 @@ tool
 const Utils = preload('res://addons/wakatime/utils.gd')
 const SETTINGS_FILE = '%s/settings.cfg' % Utils.PLUGIN_PATH
 
-
 const SECTION_NAME = 'godot-wakatime'
 const PYTHON_PATH = 'python'
 const WAKATIME_API_KEY = 'wakatime_api_key'
+const HIDE_PROJECT_NAME = 'hide_project_name'
+const HIDE_FILENAMES = 'hide_filenames'
 
 var _settings = {
 	PYTHON_PATH: null,
 	WAKATIME_API_KEY: null,
+	HIDE_PROJECT_NAME: false,
+	HIDE_FILENAMES: false,
 }
 
 
@@ -18,14 +21,17 @@ func _init():
 	load_all_settings()
 
 
-static func save_setting(key, value):
+func save_setting(key, value):
 	var config = ConfigFile.new()
 	config.load(SETTINGS_FILE)
 	config.set_value(SECTION_NAME, key, value)
-	config.save(SETTINGS_FILE)
+	var err = config.save(SETTINGS_FILE)
+	# update cache
+	if err == OK:
+		_settings[key] = value
 
 
-static func load_setting(key):
+func load_setting(key):
 	var config = ConfigFile.new()
 	var err = config.load(SETTINGS_FILE)
 	var value = null
@@ -43,4 +49,4 @@ func load_all_settings():
 func get(key):
 	if _settings.has(key):
 		return _settings[key]
-	return null
+	return load_setting(key)
