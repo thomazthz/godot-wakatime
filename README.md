@@ -13,7 +13,9 @@ For Linux/macOS users:
 
 For Windows users:
   - Download and install [Python] on system.
-  or
+  
+    **or**
+  
   - Download and extract [Python embeddable zip file] to the root path of the plugin (addons/wakatime). The extracted folder must contain `python` on its name to be automatically found by script.
 
 
