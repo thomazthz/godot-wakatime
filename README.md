@@ -27,20 +27,21 @@ For Windows users:
 5. Use Godot script editor for a while and check on https://wakatime.com/api/v1/users/current or https://wakatime.com/dashboard to see your coding activity :)
 
 
-
-## Caveat
-
-
-All heartbeats sent are printed to Godot output console. `OS.execute` do this by default and can't be disabled. **Be careful to not reveal your printed API key to anyone**.
+## Tracking GDScript files
 
 For now, [`pygments` doesn't support GDScript by default](https://bitbucket.org/birkenfeld/pygments-main/issues/1429/add-lexer-for-gdscript-from-godot-game). The workaround is to use a custom rule to force any files ending with `.gd` to be categorized as GDScript. (https://wakatime.com/settings/rules)
 
+![custom_rule_gdscript](https://user-images.githubusercontent.com/1638660/38779468-420acd1c-409f-11e8-9765-f0ee59a43774.jpg)
+
+
+## Caveat
+
+All heartbeats sent are printed to Godot output console. `OS.execute` do this by default and can't be disabled. **Be careful to not reveal your printed API key to anyone**.
 
 
 ## TODO
 
 - Download and extract wakatime-cli from their repo during plugin setup.
-- Add more cmdline args like `--exclude`, `--lineno`, `--hidefilenames`, etc and let users change it.
 - Remove cmdline output on Windows.
 
 
