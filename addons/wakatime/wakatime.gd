@@ -10,8 +10,8 @@ var last_heartbeat = HeartBeat.new()
 var wakatime_cli = ProjectSettings.globalize_path(Utils.WAKATIME_CLI_PATH)
 
 var api_key_modal = preload('res://addons/wakatime/api_key_modal.tscn')
-var bottom_panel = preload('res://addons/wakatime/bottom_panel.tscn')
-
+var bottom_panel_scn = preload('res://addons/wakatime/bottom_panel.tscn')
+var bottom_panel = null
 var settings = null
 
 
@@ -23,6 +23,7 @@ func _enter_tree():
 func _exit_tree():
 	var script_editor = get_editor_interface().get_script_editor()
 	script_editor.disconnect('editor_script_changed', self, '_on_script_changed')
+	remove_control_from_bottom_panel(bottom_panel)
 
 
 func _ready():
@@ -45,9 +46,9 @@ func _ready():
 		add_child(prompt)
 		prompt.popup_centered()
 
-	var panel = bottom_panel.instance()
-	panel.call_deferred('init', settings)
-	add_control_to_bottom_panel(panel, 'Wakatime')
+	bottom_panel = bottom_panel_scn.instance()
+	bottom_panel.call_deferred('init', settings)
+	add_control_to_bottom_panel(bottom_panel, 'Wakatime')
 
 
 func get_state():
