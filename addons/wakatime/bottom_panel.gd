@@ -2,6 +2,7 @@ tool
 extends Control
 
 onready var btn_api_key = $hbox_container/btn_api_key
+onready var btn_config_file = $hbox_container/vbox_container_02/btn_config_file
 onready var cb_proj_name = $hbox_container/vbox_container_01/cb_hide_project_name
 onready var cb_filenames = $hbox_container/vbox_container_01/cb_hide_filenames
 onready var ledit_include = $hbox_container/panel_include/ledit_include
@@ -18,6 +19,8 @@ func init(settings):
 	cb_filenames.pressed = curr_settings.get(curr_settings.HIDE_FILENAMES) or false
 
 	btn_api_key.connect('pressed', self, '_on_btn_pressed')
+	btn_config_file.connect('pressed', self, '_on_config_file_pressed')
+
 	cb_proj_name.connect('toggled', self, '_on_flag_change', [curr_settings.HIDE_PROJECT_NAME])
 	cb_filenames.connect('toggled', self, '_on_flag_change', [curr_settings.HIDE_FILENAMES])
 
@@ -30,6 +33,10 @@ func _on_btn_pressed():
 	prompt.init(curr_settings)
 	add_child(prompt)
 	prompt.popup_centered()
+
+
+func _on_config_file_pressed():
+	OS.shell_open(ProjectSettings.globalize_path(curr_settings.SETTINGS_FILE))
 
 
 func _on_flag_change(is_pressed, key):
