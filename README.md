@@ -43,8 +43,12 @@ All heartbeats sent are printed to Godot output console. `OS.execute` do this by
 
 ## TODO
 
-- Download and extract wakatime-cli from their repo during plugin setup.
-- Remove cmdline output on Windows.
+- [ ] Debug mode
+- [ ] Logs
+- [ ] Download and extract wakatime-cli from repo during plugin setup.
+- [ ] Add more [cmdline args](https://wakatime.com/help/creating-plugin#sending-file-to-wakatime-cli:executing-background-process) and let users change it on bottom panel
+- [ ] Remove cmdline output from Windows editor.
+
 
 
 [Python]: <https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe>
