@@ -1,7 +1,7 @@
 tool
 
 const PLUGIN_PATH = 'res://addons/wakatime'
-const WAKATIME_CLI_ROOT_PATH = '%s/wakatime-cli-10.1.0' % PLUGIN_PATH
+const WAKATIME_CLI_ROOT_PATH = '%s/wakatime-cli-10.2.1' % PLUGIN_PATH
 const WAKATIME_CLI_PATH = '%s/wakatime/cli.py' % WAKATIME_CLI_ROOT_PATH
 
 const REG_PREFIX_KEYS = [
