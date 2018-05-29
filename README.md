@@ -3,6 +3,9 @@
 Godot plugin for metrics, insights, and time tracking automatically generated from your Godot usage.
 
 
+![wakatime_dashboard](https://user-images.githubusercontent.com/1638660/40685625-24ec905a-636b-11e8-8c78-6d1ed833466d.png)
+
+
 ## Dependecies
 
 
@@ -29,16 +32,25 @@ For Windows users:
 5. Use Godot script editor for a while and check on https://wakatime.com/api/v1/users/current or https://wakatime.com/dashboard to see your coding activity :)
 
 
-## Tracking GDScript files
+## Tracking GDScript and GDNative files
 
 For now, [`pygments` doesn't support GDScript by default](https://bitbucket.org/birkenfeld/pygments-main/issues/1429/add-lexer-for-gdscript-from-godot-game). The workaround is to use a custom rule to force any files ending with `.gd` to be categorized as GDScript. (https://wakatime.com/settings/rules)
 
-![custom_rule_gdscript](https://user-images.githubusercontent.com/1638660/38779468-420acd1c-409f-11e8-9765-f0ee59a43774.jpg)
+![custom_rule_gdscript](https://user-images.githubusercontent.com/1638660/40685659-37dbf16a-636b-11e8-821f-fb3422715d79.png)
+
+
+## Configuring
+
+Some settings are available in the editor bottom panel as soon as the plugin is active
+
+Wakatime settings and plugin settings (like Python binary path) are stored in the file at `<GODOT_PROJECT>/addons/wakatime/settings.cfg`.
+
+![godot_wakatime_control](https://user-images.githubusercontent.com/1638660/40685673-4860f1ac-636b-11e8-89f3-229171ce5e0d.png)
 
 
 ## Caveat
 
-All heartbeats sent are printed to Godot output console. `OS.execute` do this by default and can't be disabled. **Be careful to not reveal your printed API key to anyone**.
+[Windows only] All heartbeats sent are printed to Godot output console. `OS.execute` do this by default and can't be disabled. **Be careful to not reveal your printed API key to anyone**.
 
 
 ## TODO
