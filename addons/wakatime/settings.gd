@@ -8,6 +8,8 @@ const PYTHON_PATH = 'python'
 const WAKATIME_API_KEY = 'wakatime_api_key'
 const HIDE_PROJECT_NAME = 'hide_project_name'
 const HIDE_FILENAMES = 'hide_filenames'
+const INCLUDE = 'include'
+const EXCLUDE = 'exclude'
 
 var _settings = {
 	PYTHON_PATH: null,
@@ -21,9 +23,13 @@ func _init():
 	load_all_settings()
 
 
-func save_setting(key, value):
+func save_setting(key, value, multiline=false):
 	var config = ConfigFile.new()
 	config.load(SETTINGS_FILE)
+
+	if multiline:
+		value = value.split('\n', false)
+
 	config.set_value(SECTION_NAME, key, value)
 	var err = config.save(SETTINGS_FILE)
 	# update cache

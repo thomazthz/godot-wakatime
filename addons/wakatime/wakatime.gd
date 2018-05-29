@@ -92,8 +92,19 @@ func send_heartbeat(filepath, is_write):
 	if settings.get(Settings.HIDE_FILENAMES):
 		cmd.append('--hidefilenames')
 
-	var output = []
-	OS.execute(python, cmd, false, output)
+	var includes = settings.get(Settings.INCLUDE)
+	if includes:
+		for include in includes:
+			cmd.append('--include')
+			cmd.append(include)
+
+	var excludes = settings.get(Settings.EXCLUDE)
+	if excludes:
+		for exclude in excludes:
+			cmd.append('--exclude')
+			cmd.append(exclude)
+
+	OS.execute(python, cmd, false, [])
 
 	last_heartbeat = heartbeat
 
