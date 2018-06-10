@@ -25,11 +25,23 @@ For Windows users:
 ## Installation
 
 
-1. Download and extract the zip from releases or clone the repository.
-2. Put the extracted directory into your `addons` directory of your project. Create `addons` directory at the root of your project if you don't have one.
-3. Activate `godot-wakatime` on Plugins tab at menu `Project -> Project Settings -> Plugins`.
-4. Enter your Wakatime API Key on opened prompt.
-5. Use Godot script editor for a while and check on https://wakatime.com/api/v1/users/current or https://wakatime.com/dashboard to see your coding activity :)
+The easiest and fastest way is to install directly from Godot's AssetLib
+
+1. Access Godot's AssetLib inside the engine (`F4` default keybind)
+2. Search for `godot-wakatime` and click on install button
+
+
+Or, you can manually install the latest version following the next steps
+
+1. Download and extract latest zip file from [**releases**](https://github.com/thomazthz/godot-wakatime/releases).
+2. Copy or move the `wakatime` directory from the extracted zip and put into your project's `addons` directory. Create the `addons` directory at the root of your project if you don't have one.
+
+
+### Activation
+
+- Activate `godot-wakatime` on Plugins tab at menu `Project -> Project Settings -> Plugins`.
+- Enter your Wakatime API Key on opened prompt.
+- Use Godot script editor for a while and check on https://wakatime.com/api/v1/users/current or https://wakatime.com/dashboard to see your coding activity :)
 
 
 ## Tracking GDScript and GDNative files
