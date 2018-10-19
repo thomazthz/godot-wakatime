@@ -15,11 +15,6 @@ var bottom_panel = null
 var settings = null
 
 
-func _enter_tree():
-	var script_editor = get_editor_interface().get_script_editor()
-	script_editor.connect('editor_script_changed', self, '_on_script_changed')
-
-
 func _exit_tree():
 	var script_editor = get_editor_interface().get_script_editor()
 	script_editor.disconnect('editor_script_changed', self, '_on_script_changed')
@@ -49,6 +44,9 @@ func _ready():
 	bottom_panel = bottom_panel_scn.instance()
 	bottom_panel.call_deferred('init', settings)
 	add_control_to_bottom_panel(bottom_panel, 'Wakatime')
+
+	var script_editor = get_editor_interface().get_script_editor()
+	script_editor.call_deferred('connect', 'editor_script_changed', self, '_on_script_changed')
 
 
 func get_state():
