@@ -37,7 +37,7 @@ func _ready():
 	# Check wakatime api key
 	if not settings.get(Settings.WAKATIME_API_KEY):
 		var prompt = api_key_modal.instance()
-		prompt.init(settings)
+		prompt.call_deferred('init', settings)
 		add_child(prompt)
 		prompt.popup_centered()
 
