@@ -15,23 +15,25 @@ onready var popup_textedit_incl_excl = $popup_incl_excl/panel/textedit
 onready var btn_incl_excl_close = $popup_incl_excl/panel/btn
 
 var api_key_modal = preload('res://addons/wakatime/api_key_modal.tscn')
-var curr_settings = null
+var wakatime_ref = null
+var settings = null
 var opened_popup = null
 
 
-func init(settings):
-	self.curr_settings = settings
+func _ready():
+	if wakatime_ref:
+		settings = wakatime_ref.settings
 
 	# Set initial values
-	cb_proj_name.pressed = curr_settings.get(curr_settings.HIDE_PROJECT_NAME) or false
-	cb_filenames.pressed = curr_settings.get(curr_settings.HIDE_FILENAMES) or false
+	cb_proj_name.pressed = settings.get(settings.HIDE_PROJECT_NAME) or false
+	cb_filenames.pressed = settings.get(settings.HIDE_FILENAMES) or false
 
-	var incl = curr_settings.get(curr_settings.INCLUDE)
+	var incl = settings.get(settings.INCLUDE)
 	if typeof(incl) == TYPE_STRING_ARRAY:
 		incl = incl.join('\n')
 	textedit_incl.text = incl if incl else ''
 
-	var excl = curr_settings.get(curr_settings.EXCLUDE)
+	var excl = settings.get(settings.EXCLUDE)
 	if typeof(excl) == TYPE_STRING_ARRAY:
 		excl = excl.join('\n')
 	textedit_excl.text = excl if excl else ''
@@ -40,29 +42,30 @@ func init(settings):
 	btn_api_key.connect('pressed', self, '_on_api_key_btn_pressed')
 	btn_config_file.connect('pressed', self, '_on_config_file_pressed')
 
-	cb_proj_name.connect('toggled', self, '_on_flag_change', [curr_settings.HIDE_PROJECT_NAME])
-	cb_filenames.connect('toggled', self, '_on_flag_change', [curr_settings.HIDE_FILENAMES])
+	cb_proj_name.connect('toggled', self, '_on_flag_change', [settings.HIDE_PROJECT_NAME])
+	cb_filenames.connect('toggled', self, '_on_flag_change', [settings.HIDE_FILENAMES])
 
-	btn_incl.connect('pressed', self, '_on_incl_excl_btn_pressed', [curr_settings.INCLUDE, textedit_incl])
-	btn_excl.connect('pressed', self, '_on_incl_excl_btn_pressed', [curr_settings.EXCLUDE, textedit_excl])
+	btn_incl.connect('pressed', self, '_on_incl_excl_btn_pressed', [settings.INCLUDE, textedit_incl])
+	btn_excl.connect('pressed', self, '_on_incl_excl_btn_pressed', [settings.EXCLUDE, textedit_excl])
 
 	btn_incl_excl_close.connect('pressed', self, '_on_incl_excl_close_btn_pressed')
 	popup_incl_excl.connect('popup_hide', self, '_on_incl_excl_popup_hide')
 
 
+func init(wakatime):
+	self.wakatime_ref = wakatime
+
+
 func _on_api_key_btn_pressed():
-	var prompt = api_key_modal.instance()
-	prompt.init(curr_settings)
-	add_child(prompt)
-	prompt.popup_centered()
+	wakatime_ref.open_api_key_modal()
 
 
 func _on_config_file_pressed():
-	OS.shell_open(ProjectSettings.globalize_path(curr_settings.SETTINGS_FILE))
+	OS.shell_open(ProjectSettings.globalize_path(settings.SETTINGS_FILE))
 
 
 func _on_flag_change(is_pressed, key):
-	curr_settings.save_setting(key, is_pressed)
+	settings.save_setting(key, is_pressed)
 
 
 func _on_incl_excl_btn_pressed(which, textedit):
@@ -77,10 +80,10 @@ func _on_incl_excl_close_btn_pressed():
 
 func _on_incl_excl_popup_hide():
 	var value = ''
-	if opened_popup == curr_settings.INCLUDE:
+	if opened_popup == settings.INCLUDE:
 		value = popup_textedit_incl_excl.text
 		textedit_incl.text = value
-	if opened_popup == curr_settings.EXCLUDE:
+	if opened_popup == settings.EXCLUDE:
 		value = popup_textedit_incl_excl.text
 		textedit_excl.text = value
-	curr_settings.save_setting(opened_popup, value, true)
+	settings.save_setting(opened_popup, value, true)

@@ -36,13 +36,10 @@ func _ready():
 
 	# Check wakatime api key
 	if not settings.get(Settings.WAKATIME_API_KEY):
-		var prompt = api_key_modal.instance()
-		prompt.call_deferred('init', settings)
-		add_child(prompt)
-		prompt.popup_centered()
+		open_api_key_modal()
 
 	bottom_panel = bottom_panel_scn.instance()
-	bottom_panel.call_deferred('init', settings)
+	bottom_panel.init(self)
 	add_control_to_bottom_panel(bottom_panel, 'Wakatime')
 
 	var script_editor = get_editor_interface().get_script_editor()
@@ -126,6 +123,15 @@ func _unhandled_key_input(ev):
 func save_external_data():
 	var file = get_current_file()
 	handle_activity(file, true)
+
+
+func open_api_key_modal():
+	var prompt = api_key_modal.instance()
+	prompt.init(self)
+	add_child(prompt)
+	prompt.popup_centered()
+	yield(prompt, 'popup_hide')
+	prompt.queue_free()
 
 
 func get_user_agent():
