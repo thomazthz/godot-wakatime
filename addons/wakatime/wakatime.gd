@@ -99,7 +99,7 @@ func send_heartbeat(filepath, is_write):
 			cmd.append('--exclude')
 			cmd.append(exclude)
 
-	OS.execute(python, cmd, false, [])
+	OS.execute(python, PoolStringArray(cmd), false, [])
 
 	last_heartbeat = heartbeat
 
