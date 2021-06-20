@@ -143,7 +143,7 @@ func get_plugin_name():
 
 
 func get_plugin_version():
-	return '1.3.4'
+	return '1.3.5'
 
 
 func get_engine_version():
