@@ -72,10 +72,10 @@ func send_heartbeat(filepath, is_write):
 
 	var heartbeat = HeartBeat.new(filepath, OS.get_unix_time(), is_write)
 	var cmd = [wakatime_cli,
-			   '--entity', heartbeat.filepath,
-			   '--key', wakatime_api_key,
-			   '--time', heartbeat.timestamp,
-			   '--plugin', get_user_agent()]
+				'--entity', heartbeat.filepath,
+				'--key', wakatime_api_key,
+				'--time', heartbeat.timestamp,
+				'--plugin', get_user_agent()]
 
 	if is_write:
 		cmd.append('--write')
@@ -147,6 +147,6 @@ func get_plugin_version():
 
 
 func get_engine_version():
-	return '%s.%s.%s' % [Engine.get_version_info()['major'],
-						 Engine.get_version_info()['minor'],
-						 Engine.get_version_info()['patch']]
+	return '%s.%s.%s' % [	Engine.get_version_info()['major'],
+							Engine.get_version_info()['minor'],
+							Engine.get_version_info()['patch']]
