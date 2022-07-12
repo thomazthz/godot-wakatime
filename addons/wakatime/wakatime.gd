@@ -130,7 +130,7 @@ func open_api_key_modal():
 	prompt.init(self)
 	add_child(prompt)
 	prompt.popup_centered()
-	yield(prompt, 'popup_hide')
+	await prompt.popup_hide
 	prompt.queue_free()
 
 
