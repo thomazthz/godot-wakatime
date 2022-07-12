@@ -39,17 +39,17 @@ func _ready():
 	textedit_excl.text = excl if excl else ''
 
 	# Signals
-	btn_api_key.connect('pressed', self, '_on_api_key_btn_pressed')
-	btn_config_file.connect('pressed', self, '_on_config_file_pressed')
+	btn_api_key.pressed.connect(self._on_api_key_btn_pressed)
+	btn_config_file.pressed.connect(self._on_config_file_pressed)
 
-	cb_proj_name.connect('toggled', self, '_on_flag_change', [settings.HIDE_PROJECT_NAME])
-	cb_filenames.connect('toggled', self, '_on_flag_change', [settings.HIDE_FILENAMES])
+	cb_proj_name.toggled.connect(self._on_flag_change.bind(settings.HIDE_PROJECT_NAME))
+	cb_filenames.toggled.connect(self._on_flag_change.bind(settings.HIDE_PROJECT_NAME))
 
-	btn_incl.connect('pressed', self, '_on_incl_excl_btn_pressed', [settings.INCLUDE, textedit_incl])
-	btn_excl.connect('pressed', self, '_on_incl_excl_btn_pressed', [settings.EXCLUDE, textedit_excl])
+	btn_incl.pressed.connect(self._on_incl_excl_btn_pressed.bind(settings.INCLUDE, textedit_incl))
+	btn_excl.pressed.connect(self._on_incl_excl_btn_pressed.bind(settings.EXCLUDE, textedit_excl))
 
-	btn_incl_excl_close.connect('pressed', self, '_on_incl_excl_close_btn_pressed')
-	popup_incl_excl.connect('popup_hide', self, '_on_incl_excl_popup_hide')
+	btn_incl_excl_close.pressed.connect(self._on_incl_excl_close_btn_pressed)
+	popup_incl_excl.popup_hide.connect(self._on_incl_excl_popup_hide)
 
 
 func init(wakatime):

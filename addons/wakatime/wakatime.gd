@@ -17,7 +17,7 @@ var settings = null
 
 func _exit_tree():
 	var script_editor = get_editor_interface().get_script_editor()
-	script_editor.disconnect('editor_script_changed', self, '_on_script_changed')
+	script_editor.editor_script_changed.disconnect(self._on_script_changed)
 	remove_control_from_bottom_panel(bottom_panel)
 
 

@@ -19,10 +19,10 @@ func _ready():
 		if curr_api_key:
 			api_key_line_edit.text = curr_api_key
 
-	save_btn.connect('pressed', self, '_on_confirm')
-	show_btn.connect('pressed', self, '_on_toggle_secret_text')
-	cancel_btn.connect('pressed', self, '_on_cancel')
-	api_key_line_edit.connect('text_entered', self, '_on_confirm')
+	save_btn.pressed.connect(self._on_confirm)
+	show_btn.pressed.connect(self._on_toggle_secret_text)
+	cancel_btn.pressed.connect(self._on_cancel)
+	api_key_line_edit.text_entered.connect(self._on_confirm)
 
 
 func init(wakatime):
