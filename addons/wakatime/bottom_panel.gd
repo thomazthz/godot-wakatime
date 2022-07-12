@@ -29,12 +29,12 @@ func _ready():
 	cb_filenames.pressed = settings.get(settings.HIDE_FILENAMES) or false
 
 	var incl = settings.get(settings.INCLUDE)
-	if typeof(incl) == TYPE_STRING_ARRAY:
+	if typeof(incl) == TYPE_PACKED_STRING_ARRAY:
 		incl = incl.join('\n')
 	textedit_incl.text = incl if incl else ''
 
 	var excl = settings.get(settings.EXCLUDE)
-	if typeof(excl) == TYPE_STRING_ARRAY:
+	if typeof(excl) == TYPE_PACKED_STRING_ARRAY:
 		excl = excl.join('\n')
 	textedit_excl.text = excl if excl else ''
 

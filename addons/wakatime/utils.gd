@@ -61,7 +61,7 @@ static func _check_python_bin(bin):
 		return false
 
 	var output = []
-	OS.execute(bin, PoolStringArray(['--version']), true, output)
+	OS.execute(bin, PackedStringArray(['--version']), output)
 	return output != []
 
 
@@ -72,7 +72,7 @@ static func _get_python_bin_from_windows_reg():
 	for prefix in REG_PREFIX_KEYS:
 		for python_key in REG_PYTHON_KEYS:
 			var reg_path = '%s\\%s\\PythonCore' % [prefix, python_key]
-			OS.execute('reg', PoolStringArray(['query', reg_path]), true, output)
+			OS.execute('reg', PackedStringArray(['query', reg_path]), output)
 
 			for key in output:
 				if not key.strip_edges():
@@ -81,7 +81,7 @@ static func _get_python_bin_from_windows_reg():
 				reg_paths.append('%s\\%s\\PythonCore\\%s\\InstallPath' % [prefix, python_key, version])
 
 	for path in reg_paths:
-		OS.execute('reg', PoolStringArray(['query', path, '/v', 'ExecutablePath']), true, output)
+		OS.execute('reg', PackedStringArray(['query', path, '/v', 'ExecutablePath']), output)
 		for key in output:
 			if not key.strip_edges():
 				continue

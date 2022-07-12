@@ -70,7 +70,7 @@ func send_heartbeat(filepath, is_write):
 	var python = settings.get(Settings.PYTHON_PATH)
 	var wakatime_api_key = settings.get(Settings.WAKATIME_API_KEY)
 
-	var heartbeat = HeartBeat.new(filepath, OS.get_unix_time(), is_write)
+	var heartbeat = HeartBeat.new(filepath, Time.get_unix_time_from_system(), is_write)
 	var cmd = [wakatime_cli,
 				'--entity', heartbeat.filepath,
 				'--key', wakatime_api_key,
@@ -99,13 +99,13 @@ func send_heartbeat(filepath, is_write):
 			cmd.append('--exclude')
 			cmd.append(exclude)
 
-	OS.execute(python, PoolStringArray(cmd), false, [])
+	OS.execute(python, PackedStringArray(cmd), [])
 
 	last_heartbeat = heartbeat
 
 
 func enough_time_has_passed(last_sent_time):
-	return OS.get_unix_time() - last_heartbeat.timestamp >= HeartBeat.FILE_MODIFIED_DELAY
+	return Time.get_unix_time_from_system() - last_heartbeat.timestamp >= HeartBeat.FILE_MODIFIED_DELAY
 
 
 # file changed
