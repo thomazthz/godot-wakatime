@@ -1,4 +1,4 @@
-tool
+@tool
 
 const PLUGIN_PATH = 'res://addons/wakatime'
 const WAKATIME_CLI_ROOT_PATH = '%s/wakatime-cli-10.2.1' % PLUGIN_PATH

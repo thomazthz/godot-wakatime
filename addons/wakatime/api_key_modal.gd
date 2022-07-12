@@ -1,10 +1,10 @@
-tool
+@tool
 extends PopupPanel
 
-onready var api_key_line_edit = $vbox_container/hbox_container_top/line_edit
-onready var show_btn = $vbox_container/hbox_container_top/show_btn
-onready var save_btn = $vbox_container/hbox_container_bottom/save_btn
-onready var cancel_btn = $vbox_container/hbox_container_bottom/cancel_btn
+@onready var api_key_line_edit = $vbox_container/hbox_container_top/line_edit
+@onready var show_btn = $vbox_container/hbox_container_top/show_btn
+@onready var save_btn = $vbox_container/hbox_container_bottom/save_btn
+@onready var cancel_btn = $vbox_container/hbox_container_bottom/cancel_btn
 
 var wakatime_ref = null
 var settings = null

@@ -1,4 +1,4 @@
-tool
+@tool
 
 const Utils = preload('res://addons/wakatime/utils.gd')
 const SETTINGS_FILE = '%s/settings.cfg' % Utils.PLUGIN_PATH

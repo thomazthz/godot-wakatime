@@ -1,18 +1,18 @@
-tool
+@tool
 extends Control
 
-onready var btn_api_key = $hbox_container/btn_api_key
-onready var btn_config_file = $hbox_container/vbox_container_02/btn_config_file
-onready var cb_proj_name = $hbox_container/vbox_container_01/cb_hide_project_name
-onready var cb_filenames = $hbox_container/vbox_container_01/cb_hide_filenames
+@onready var btn_api_key = $hbox_container/btn_api_key
+@onready var btn_config_file = $hbox_container/vbox_container_02/btn_config_file
+@onready var cb_proj_name = $hbox_container/vbox_container_01/cb_hide_project_name
+@onready var cb_filenames = $hbox_container/vbox_container_01/cb_hide_filenames
 
-onready var btn_incl = $hbox_container/panel_include/hbox_container_01/btn_include
-onready var btn_excl = $hbox_container/panel_exclude/hbox_container_01/btn_exclude
-onready var popup_incl_excl = $popup_incl_excl
-onready var textedit_incl = $hbox_container/panel_include/hbox_container_01/textedit_include
-onready var textedit_excl = $hbox_container/panel_exclude/hbox_container_01/textedit_exclude
-onready var popup_textedit_incl_excl = $popup_incl_excl/panel/textedit
-onready var btn_incl_excl_close = $popup_incl_excl/panel/btn
+@onready var btn_incl = $hbox_container/panel_include/hbox_container_01/btn_include
+@onready var btn_excl = $hbox_container/panel_exclude/hbox_container_01/btn_exclude
+@onready var popup_incl_excl = $popup_incl_excl
+@onready var textedit_incl = $hbox_container/panel_include/hbox_container_01/textedit_include
+@onready var textedit_excl = $hbox_container/panel_exclude/hbox_container_01/textedit_exclude
+@onready var popup_textedit_incl_excl = $popup_incl_excl/panel/textedit
+@onready var btn_incl_excl_close = $popup_incl_excl/panel/btn
 
 var api_key_modal = preload('res://addons/wakatime/api_key_modal.tscn')
 var wakatime_ref = null

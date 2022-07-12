@@ -1,4 +1,4 @@
-tool
+@tool
 extends EditorPlugin
 
 const HeartBeat = preload('res://addons/wakatime/heartbeat.gd')
