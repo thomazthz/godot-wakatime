@@ -1,7 +1,9 @@
 tool
 
-const Utils = preload('res://addons/wakatime/utils.gd')
-const SETTINGS_FILE = '%s/settings.cfg' % Utils.PLUGIN_PATH
+extends Resource
+
+const PLUGIN_PATH = 'res://addons/wakatime'
+const SETTINGS_FILE = '%s/settings.cfg' % PLUGIN_PATH
 
 const SECTION_NAME = 'godot-wakatime'
 const PYTHON_PATH = 'python'
@@ -12,47 +14,47 @@ const INCLUDE = 'include'
 const EXCLUDE = 'exclude'
 
 var _settings = {
-	PYTHON_PATH: null,
-	WAKATIME_API_KEY: null,
-	HIDE_PROJECT_NAME: false,
-	HIDE_FILENAMES: false,
+    PYTHON_PATH: null,
+    WAKATIME_API_KEY: null,
+    HIDE_PROJECT_NAME: false,
+    HIDE_FILENAMES: false,
 }
 
 
 func _init():
-	load_all_settings()
+    load_all_settings()
 
 
 func save_setting(key, value, multiline=false):
-	var config = ConfigFile.new()
-	config.load(SETTINGS_FILE)
+    var config = ConfigFile.new()
+    config.load(SETTINGS_FILE)
 
-	if multiline:
-		value = value.split('\n', false)
+    if multiline:
+        value = value.split('\n', false)
 
-	config.set_value(SECTION_NAME, key, value)
-	var err = config.save(SETTINGS_FILE)
-	# update cache
-	if err == OK:
-		_settings[key] = value
+    config.set_value(SECTION_NAME, key, value)
+    var err = config.save(SETTINGS_FILE)
+    # update cache
+    if err == OK:
+        _settings[key] = value
 
 
 func load_setting(key):
-	var config = ConfigFile.new()
-	var err = config.load(SETTINGS_FILE)
-	var value = null
-	if err == OK:
-		if config.has_section_key(SECTION_NAME, key):
-			value = config.get_value(SECTION_NAME, key)
-	return value
+    var config = ConfigFile.new()
+    var err = config.load(SETTINGS_FILE)
+    var value = null
+    if err == OK:
+        if config.has_section_key(SECTION_NAME, key):
+            value = config.get_value(SECTION_NAME, key)
+    return value
 
 
 func load_all_settings():
-	for key in _settings:
-		_settings[key] = load_setting(key)
+    for key in _settings:
+        _settings[key] = load_setting(key)
 
 
 func get(key):
-	if _settings.has(key):
-		return _settings[key]
-	return load_setting(key)
+    if _settings.has(key):
+        return _settings[key]
+    return load_setting(key)
