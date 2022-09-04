@@ -20,10 +20,7 @@ var settings = null
 var opened_popup = null
 
 
-func _ready():
-    if wakatime_ref:
-        settings = wakatime_ref.settings
-
+func setup():
     # Set initial values
     cb_proj_name.pressed = settings.get(settings.HIDE_PROJECT_NAME) or false
     cb_filenames.pressed = settings.get(settings.HIDE_FILENAMES) or false
@@ -52,9 +49,10 @@ func _ready():
     popup_incl_excl.connect('popup_hide', self, '_on_incl_excl_popup_hide')
 
 
-func init(wakatime):
+func configure(wakatime, _settings):
     self.wakatime_ref = wakatime
-    self.settings = wakatime_ref.settings
+    self.settings = _settings
+    setup()
 
 
 func _on_api_key_btn_pressed():

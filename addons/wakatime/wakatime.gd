@@ -261,8 +261,8 @@ func setup_plugin():
 
     # Build Wakatime panel
     bottom_panel = bottom_panel_scn.instance()
-    bottom_panel.init(self)
     add_control_to_bottom_panel(bottom_panel, 'Wakatime')
+    bottom_panel.configure(self, settings)
 
 
 func disable_plugin():
