@@ -5,9 +5,7 @@ const HeartBeat = preload('res://addons/wakatime/heartbeat.gd')
 const Settings = preload('res://addons/wakatime/settings.gd')
 
 const PLUGIN_PATH = 'res://addons/wakatime'
-const WAKATIME_CLI_FILEPATH = '%s/wakatime-cli' % PLUGIN_PATH
 const WAKATIME_ZIP_FILEPATH = '%s/wakatime.zip' % PLUGIN_PATH
-const DECOMPRESSOR_FILEPATH = '%s/ouch' % PLUGIN_PATH
 
 const WAKATIME_URL_FMT = 'https://github.com/wakatime/wakatime-cli/releases/download/v1.54.0/{wakatime_build}.zip'
 const DECOMPRESSOR_URL_FMT = 'https://github.com/ouch-org/ouch/releases/download/0.3.1/{ouch_build}'
@@ -16,6 +14,7 @@ var last_heartbeat = HeartBeat.new()
 
 var wakatime_dir = null
 var wakatime_cli = null
+var decompressor_cli = null
 
 var api_key_modal = preload('res://addons/wakatime/api_key_modal.tscn')
 var bottom_panel_scn = preload('res://addons/wakatime/bottom_panel.tscn')
@@ -57,14 +56,14 @@ func get_ouch_build():
 
 
 func get_wakatime_directory():
-    if !wakatime_dir:
+    if not wakatime_dir:
         wakatime_dir = '%s/.wakatime' % get_home_directory()
 
     return wakatime_dir
 
 
 func get_wakatime_cli():
-    if !wakatime_cli:
+    if not wakatime_cli:
         var build = get_wakatime_build()
         var ext = '.exe' if is_windows else ''
         wakatime_cli = '%s/%s%s' % [get_wakatime_directory(), build, ext]
@@ -72,17 +71,29 @@ func get_wakatime_cli():
     return wakatime_cli
 
 
+func get_decompressor_cli():
+    if not decompressor_cli:
+        var build = get_ouch_build()
+        var ext = '.exe' if is_windows else ''
+        decompressor_cli = '%s/%s%s' % [PLUGIN_PATH, build, ext]
+
+    return decompressor_cli
+
+
 func get_home_directory():
     var home = null
     for env in ['WAKATIME_HOME', 'USERPROFILE', 'HOME']:
         home = OS.get_environment(env)
         if home:
+            if is_windows:
+                home = home.replace('\\', '/')
             return home
+
     return PLUGIN_PATH
 
 
 func has_decompression_lib():
-    return File.new().file_exists(DECOMPRESSOR_FILEPATH)
+    return File.new().file_exists(get_decompressor_cli())
 
 
 func has_wakatime_cli():
@@ -96,9 +107,11 @@ func has_wakatime_zip():
 func download_decompressor():
     pprint('Downloading Ouch! (decompression lib)...')
     var url = DECOMPRESSOR_URL_FMT.format({'ouch_build': get_ouch_build()})
+    if is_windows:
+        url = '%s.exe' % url
 
     var http = HTTPRequest.new()
-    http.download_file = DECOMPRESSOR_FILEPATH
+    http.download_file = get_decompressor_cli()
     http.connect('request_completed', self, '_decompressor_download_completed')
     add_child(http)
 
@@ -116,11 +129,11 @@ func _decompressor_download_completed(result, status_code, headers, body):
         pprint_error('Failed to save decompression lib')
         return
 
-    var decompressor = ProjectSettings.globalize_path(DECOMPRESSOR_FILEPATH)
+    var decompressor = ProjectSettings.globalize_path(get_decompressor_cli())
     if is_linux or is_macos:
         OS.execute('chmod', ['+x', decompressor], true)
 
-    pprint('Ouch! download completed. Saved at %s' % DECOMPRESSOR_FILEPATH)
+    pprint('Ouch! download completed. Saved at %s' % get_decompressor_cli())
 
     extract_files(WAKATIME_ZIP_FILEPATH, get_wakatime_directory())
 
@@ -155,7 +168,7 @@ func extract_files(source_file, output_dir):
         return
 
     pprint('Extracting files from Wakatime zip')
-    var decompressor = ProjectSettings.globalize_path(DECOMPRESSOR_FILEPATH)
+    var decompressor = ProjectSettings.globalize_path(get_decompressor_cli())
     var source = ProjectSettings.globalize_path(source_file)
     var destination = ProjectSettings.globalize_path(output_dir)
     var errors = []
@@ -180,7 +193,7 @@ func clean_downloaded_files():
         delete_file(WAKATIME_ZIP_FILEPATH)
 
     if has_decompression_lib():
-        delete_file(DECOMPRESSOR_FILEPATH)
+        delete_file(get_decompressor_cli())
 
 
 func delete_file(path):
