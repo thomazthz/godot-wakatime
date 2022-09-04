@@ -171,10 +171,11 @@ func extract_files(source_file, output_dir):
         pprint_error('Failed to install Wakatime CLI')
 
     # Remove unnecessary files
-    clean()
+    pprint('Cleaning downloaded files')
+    clean_downloaded_files()
 
 
-func clean():
+func clean_downloaded_files():
     if has_wakatime_zip():
         delete_file(WAKATIME_ZIP_FILEPATH)
 
@@ -201,8 +202,47 @@ func check_dependencies():
         download_decompressor()
 
 
+func check_old_plugin_version_installed():
+    var old_versions = ['wakatime-cli-10.1.0', 'wakatime-cli-10.2.1']
+
+    var dir = Directory.new()
+    var version_installed = null
+    for cli_version in old_versions:
+        var wakatime_cli_dir = '%s/%s' % [PLUGIN_PATH, cli_version]
+        if dir.dir_exists(wakatime_cli_dir):
+            version_installed = wakatime_cli_dir
+
+    if version_installed == null:
+        return
+
+    pprint('Deleting old Wakatime CLI version: %s' % version_installed)
+    delete_recursive(version_installed)
+
+
+func delete_recursive(path):
+    var directory = Directory.new()
+
+    var error = directory.open(path)
+    if error == OK:
+        directory.list_dir_begin(true)
+        var file_name = directory.get_next()
+        while file_name != '':
+            if directory.current_is_dir():
+                delete_recursive('%s/%s' % [path, file_name])
+            else:
+                directory.remove(file_name)
+            file_name = directory.get_next()
+
+        # Remove current path
+        directory.remove(path)
+    else:
+        pprint_error('Failed to remove %s' % path)
+
+
 func setup_plugin():
     pprint('Initializing %s plugin...' % get_user_agent())
+
+    check_old_plugin_version_installed()
 
     check_dependencies()
 
