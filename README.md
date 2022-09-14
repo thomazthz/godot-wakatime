@@ -48,3 +48,10 @@ Some settings are available in the editor bottom panel as soon as the plugin is 
 Wakatime settings and plugin settings (like Python binary path) are stored in the file at `<GODOT_PROJECT>/addons/wakatime/settings.cfg`.
 
 ![godot_wakatime_control](https://user-images.githubusercontent.com/1638660/40685673-4860f1ac-636b-11e8-89f3-229171ce5e0d.png)
+
+
+## Supported Godot versions
+
+Tested with Godot `3.3.X`, `3.4.X` and `3.5.X` on **Windows** and **Linux**.
+
+It has Mac OS support as well, but has not yet been tested.
