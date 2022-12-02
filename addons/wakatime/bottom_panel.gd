@@ -1,6 +1,11 @@
 @tool
 extends Control
 
+var api_key_modal = preload('res://addons/wakatime/api_key_modal.tscn')
+var wakatime_ref = null
+var settings = null
+var opened_popup = null
+
 @onready var btn_api_key = $hbox_container/btn_api_key
 @onready var btn_config_file = $hbox_container/vbox_container_02/btn_config_file
 @onready var cb_proj_name = $hbox_container/vbox_container_01/cb_hide_project_name
@@ -14,16 +19,7 @@ extends Control
 @onready var popup_textedit_incl_excl = $popup_incl_excl/panel/textedit
 @onready var btn_incl_excl_close = $popup_incl_excl/panel/btn
 
-var api_key_modal = preload('res://addons/wakatime/api_key_modal.tscn')
-var wakatime_ref = null
-var settings = null
-var opened_popup = null
-
-
-func _ready():
-	if wakatime_ref:
-		settings = wakatime_ref.settings
-
+func setup():
 	# Set initial values
 	cb_proj_name.pressed = settings.get(settings.HIDE_PROJECT_NAME) or false
 	cb_filenames.pressed = settings.get(settings.HIDE_FILENAMES) or false
@@ -50,11 +46,6 @@ func _ready():
 
 	btn_incl_excl_close.pressed.connect(self._on_incl_excl_close_btn_pressed)
 	popup_incl_excl.popup_hide.connect(self._on_incl_excl_popup_hide)
-
-
-func init(wakatime):
-	self.wakatime_ref = wakatime
-
 
 func _on_api_key_btn_pressed():
 	wakatime_ref.open_api_key_modal()

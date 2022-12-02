@@ -1,7 +1,9 @@
 @tool
 
-const Utils = preload('res://addons/wakatime/utils.gd')
-const SETTINGS_FILE = '%s/settings.cfg' % Utils.PLUGIN_PATH
+extends Resource
+
+const PLUGIN_PATH = 'res://addons/wakatime'
+const SETTINGS_FILE = '%s/settings.cfg' % PLUGIN_PATH
 
 const SECTION_NAME = 'godot-wakatime'
 const PYTHON_PATH = 'python'
