@@ -1,18 +1,18 @@
-tool
+@tool
 extends Control
 
-onready var btn_api_key = $hbox_container/btn_api_key
-onready var btn_config_file = $hbox_container/vbox_container_02/btn_config_file
-onready var cb_proj_name = $hbox_container/vbox_container_01/cb_hide_project_name
-onready var cb_filenames = $hbox_container/vbox_container_01/cb_hide_filenames
+@onready var btn_api_key = $hbox_container/btn_api_key
+@onready var btn_config_file = $hbox_container/vbox_container_02/btn_config_file
+@onready var cb_proj_name = $hbox_container/vbox_container_01/cb_hide_project_name
+@onready var cb_filenames = $hbox_container/vbox_container_01/cb_hide_filenames
 
-onready var btn_incl = $hbox_container/panel_include/hbox_container_01/btn_include
-onready var btn_excl = $hbox_container/panel_exclude/hbox_container_01/btn_exclude
-onready var popup_incl_excl = $popup_incl_excl
-onready var textedit_incl = $hbox_container/panel_include/hbox_container_01/textedit_include
-onready var textedit_excl = $hbox_container/panel_exclude/hbox_container_01/textedit_exclude
-onready var popup_textedit_incl_excl = $popup_incl_excl/panel/textedit
-onready var btn_incl_excl_close = $popup_incl_excl/panel/btn
+@onready var btn_incl = $hbox_container/panel_include/hbox_container_01/btn_include
+@onready var btn_excl = $hbox_container/panel_exclude/hbox_container_01/btn_exclude
+@onready var popup_incl_excl = $popup_incl_excl
+@onready var textedit_incl = $hbox_container/panel_include/hbox_container_01/textedit_include
+@onready var textedit_excl = $hbox_container/panel_exclude/hbox_container_01/textedit_exclude
+@onready var popup_textedit_incl_excl = $popup_incl_excl/panel/textedit
+@onready var btn_incl_excl_close = $popup_incl_excl/panel/btn
 
 var api_key_modal = preload('res://addons/wakatime/api_key_modal.tscn')
 var wakatime_ref = null
@@ -22,31 +22,31 @@ var opened_popup = null
 
 func setup():
     # Set initial values
-    cb_proj_name.pressed = settings.get(settings.HIDE_PROJECT_NAME) or false
-    cb_filenames.pressed = settings.get(settings.HIDE_FILENAMES) or false
+    cb_proj_name.button_pressed = settings.get(settings.HIDE_PROJECT_NAME) or false
+    cb_filenames.button_pressed = settings.get(settings.HIDE_FILENAMES) or false
 
     var incl = settings.get(settings.INCLUDE)
-    if typeof(incl) == TYPE_STRING_ARRAY:
-        incl = incl.join('\n')
+    if typeof(incl) == TYPE_PACKED_STRING_ARRAY:
+        incl = '\n'.join(incl)
     textedit_incl.text = incl if incl else ''
 
     var excl = settings.get(settings.EXCLUDE)
-    if typeof(excl) == TYPE_STRING_ARRAY:
-        excl = excl.join('\n')
+    if typeof(excl) == TYPE_PACKED_STRING_ARRAY:
+        excl = '\n'.join(excl)
     textedit_excl.text = excl if excl else ''
 
     # Signals
-    btn_api_key.connect('pressed', self, '_on_api_key_btn_pressed')
-    btn_config_file.connect('pressed', self, '_on_config_file_pressed')
+    btn_api_key.connect('pressed', Callable(self, '_on_api_key_btn_pressed'))
+    btn_config_file.connect('pressed', Callable(self, '_on_config_file_pressed'))
 
-    cb_proj_name.connect('toggled', self, '_on_flag_change', [settings.HIDE_PROJECT_NAME])
-    cb_filenames.connect('toggled', self, '_on_flag_change', [settings.HIDE_FILENAMES])
+    cb_proj_name.connect('toggled', Callable(self, '_on_flag_change').bind(settings.HIDE_PROJECT_NAME))
+    cb_filenames.connect('toggled', Callable(self, '_on_flag_change').bind(settings.HIDE_FILENAMES))
 
-    btn_incl.connect('pressed', self, '_on_incl_excl_btn_pressed', [settings.INCLUDE, textedit_incl])
-    btn_excl.connect('pressed', self, '_on_incl_excl_btn_pressed', [settings.EXCLUDE, textedit_excl])
+    btn_incl.connect('pressed', Callable(self, '_on_incl_excl_btn_pressed').bind(settings.INCLUDE, textedit_incl))
+    btn_excl.connect('pressed', Callable(self, '_on_incl_excl_btn_pressed').bind(settings.EXCLUDE, textedit_excl))
 
-    btn_incl_excl_close.connect('pressed', self, '_on_incl_excl_close_btn_pressed')
-    popup_incl_excl.connect('popup_hide', self, '_on_incl_excl_popup_hide')
+    btn_incl_excl_close.connect('pressed', Callable(self, '_on_incl_excl_close_btn_pressed'))
+    popup_incl_excl.connect('popup_hide', Callable(self, '_on_incl_excl_popup_hide'))
 
 
 func configure(wakatime, _settings):

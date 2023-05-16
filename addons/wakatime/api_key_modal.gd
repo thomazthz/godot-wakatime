@@ -1,10 +1,10 @@
-tool
+@tool
 extends PopupPanel
 
-onready var api_key_line_edit = $vbox_container/hbox_container_top/line_edit
-onready var show_btn = $vbox_container/hbox_container_top/show_btn
-onready var save_btn = $vbox_container/hbox_container_bottom/save_btn
-onready var cancel_btn = $vbox_container/hbox_container_bottom/cancel_btn
+@onready var api_key_line_edit = $vbox_container/hbox_container_top/line_edit
+@onready var show_btn = $vbox_container/hbox_container_top/show_btn
+@onready var save_btn = $vbox_container/hbox_container_bottom/save_btn
+@onready var cancel_btn = $vbox_container/hbox_container_bottom/cancel_btn
 
 var wakatime_ref = null
 var settings = null
@@ -19,10 +19,10 @@ func _ready():
         if curr_api_key:
             api_key_line_edit.text = curr_api_key
 
-    save_btn.connect('pressed', self, '_on_confirm')
-    show_btn.connect('pressed', self, '_on_toggle_secret_text')
-    cancel_btn.connect('pressed', self, '_on_cancel')
-    api_key_line_edit.connect('text_entered', self, '_on_confirm')
+    save_btn.connect('pressed', Callable(self, '_on_confirm'))
+    show_btn.connect('pressed', Callable(self, '_on_toggle_secret_text'))
+    cancel_btn.connect('pressed', Callable(self, '_on_cancel'))
+    api_key_line_edit.connect('text_submitted', Callable(self, '_on_confirm'))
 
 
 func init(wakatime):

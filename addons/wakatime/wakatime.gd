@@ -1,4 +1,4 @@
-tool
+@tool
 extends EditorPlugin
 
 const HeartBeat = preload('res://addons/wakatime/heartbeat.gd')
@@ -21,11 +21,13 @@ var bottom_panel_scn = preload('res://addons/wakatime/bottom_panel.tscn')
 var bottom_panel = null
 var settings = null
 
-var is_windows = OS.has_feature('Windows') or OS.has_feature('UWP')
-var is_linux = OS.has_feature('X11')
-var is_macos = OS.has_feature('OSX')
+var is_windows = OS.has_feature('windows') or OS.has_feature('uwp')
+var is_linux = OS.has_feature('linux')
+var is_macos = OS.has_feature('macos')
 var is_amd64 = OS.has_feature('x86_64')
 var is_arm64 = OS.has_feature('arm64')
+
+var debug = false
 
 func get_wakatime_build():
     # Default system = Linux
@@ -55,15 +57,15 @@ func get_ouch_build():
     return 'ouch-%s-%s' % ['x86_64', platform]
 
 
-func get_wakatime_directory():
-    if not wakatime_dir:
+func get_wakatime_directory() -> String:
+    if wakatime_dir == null:
         wakatime_dir = '%s/.wakatime' % get_home_directory()
 
     return wakatime_dir
 
 
-func get_wakatime_cli():
-    if not wakatime_cli:
+func get_wakatime_cli() -> String:
+    if wakatime_cli == null:
         var build = get_wakatime_build()
         var ext = '.exe' if is_windows else ''
         wakatime_cli = '%s/%s%s' % [get_wakatime_directory(), build, ext]
@@ -71,8 +73,8 @@ func get_wakatime_cli():
     return wakatime_cli
 
 
-func get_decompressor_cli():
-    if not decompressor_cli:
+func get_decompressor_cli() -> String:
+    if decompressor_cli == null:
         var build = get_ouch_build()
         var ext = '.exe' if is_windows else ''
         decompressor_cli = '%s/%s%s' % [PLUGIN_PATH, build, ext]
@@ -93,15 +95,15 @@ func get_home_directory():
 
 
 func has_decompression_lib():
-    return File.new().file_exists(get_decompressor_cli())
+    return FileAccess.file_exists(get_decompressor_cli())
 
 
 func has_wakatime_cli():
-    return File.new().file_exists(get_wakatime_cli())
+    return FileAccess.file_exists(get_wakatime_cli())
 
 
 func has_wakatime_zip():
-    return File.new().file_exists(WAKATIME_ZIP_FILEPATH)
+    return FileAccess.file_exists(WAKATIME_ZIP_FILEPATH)
 
 
 func download_decompressor():
@@ -112,7 +114,7 @@ func download_decompressor():
 
     var http = HTTPRequest.new()
     http.download_file = get_decompressor_cli()
-    http.connect('request_completed', self, '_decompressor_download_completed')
+    http.connect('request_completed', Callable(self, '_decompressor_download_completed'))
     add_child(http)
 
     var error = http.request(url)
@@ -131,7 +133,7 @@ func _decompressor_download_completed(result, status_code, headers, body):
 
     var decompressor = ProjectSettings.globalize_path(get_decompressor_cli())
     if is_linux or is_macos:
-        OS.execute('chmod', ['+x', decompressor], true)
+        OS.execute('chmod', ['+x', decompressor], [], true)
 
     pprint('Ouch! download completed. Saved at %s' % get_decompressor_cli())
 
@@ -144,7 +146,7 @@ func download_wakatime():
 
     var http = HTTPRequest.new()
     http.download_file = WAKATIME_ZIP_FILEPATH
-    http.connect('request_completed', self, '_wakatime_download_completed')
+    http.connect('request_completed', Callable(self, '_wakatime_download_completed'))
     add_child(http)
 
     var error = http.request(url)
@@ -173,7 +175,7 @@ func extract_files(source_file, output_dir):
     var destination = ProjectSettings.globalize_path(output_dir)
     var errors = []
     var args = ['--yes', 'decompress', source, '--dir', destination]
-    var error = OS.execute(decompressor, args, true, errors, true)
+    var error = OS.execute(decompressor, args, errors, true)
     if error:
         pprint_error(errors)
         return
@@ -197,7 +199,7 @@ func clean_downloaded_files():
 
 
 func delete_file(path):
-    var dir = Directory.new()
+    var dir = DirAccess.open('res://')
     var error = dir.remove(path)
     if error != OK:
         pprint_error('Failed to remove %s' % path)
@@ -217,12 +219,11 @@ func check_dependencies():
 
 func check_old_plugin_version_installed():
     var old_versions = ['wakatime-cli-10.1.0', 'wakatime-cli-10.2.1']
-
-    var dir = Directory.new()
+    var directory = DirAccess.open('res://')
     var version_installed = null
     for cli_version in old_versions:
         var wakatime_cli_dir = '%s/%s' % [PLUGIN_PATH, cli_version]
-        if dir.dir_exists(wakatime_cli_dir):
+        if directory.dir_exists(wakatime_cli_dir):
             version_installed = wakatime_cli_dir
 
     if version_installed == null:
@@ -233,11 +234,11 @@ func check_old_plugin_version_installed():
 
 
 func delete_recursive(path):
-    var directory = Directory.new()
+    var directory = DirAccess.open(path)
 
-    var error = directory.open(path)
+    var error = directory.get_open_error()
     if error == OK:
-        directory.list_dir_begin(true)
+        directory.list_dir_begin()
         var file_name = directory.get_next()
         while file_name != '':
             if directory.current_is_dir():
@@ -263,25 +264,26 @@ func setup_plugin():
     settings = Settings.new()
 
     # Check wakatime api key
-    if not settings.get(Settings.WAKATIME_API_KEY):
+    var api_key = settings.get(Settings.WAKATIME_API_KEY)
+    if api_key == null or api_key == '':
         open_api_key_modal()
 
-    yield(get_tree(), 'idle_frame')
+    await get_tree().process_frame
 
     # Register editor changed callback
     var script_editor = get_editor_interface().get_script_editor()
-    script_editor.call_deferred('connect', 'editor_script_changed', self, '_on_script_changed')
+    script_editor.call_deferred('connect', 'editor_script_changed', Callable(self, '_on_script_changed'))
 
     # Build Wakatime panel
-    bottom_panel = bottom_panel_scn.instance()
+    bottom_panel = bottom_panel_scn.instantiate()
     add_control_to_bottom_panel(bottom_panel, 'Wakatime')
     bottom_panel.configure(self, settings)
 
 
-func disable_plugin():
+func _disable_plugin():
     var script_editor = get_editor_interface().get_script_editor()
-    if script_editor.is_connected('editor_script_changed', self, '_on_script_changed'):
-        script_editor.disconnect('editor_script_changed', self, '_on_script_changed')
+    if script_editor.is_connected('editor_script_changed', Callable(self, '_on_script_changed')):
+        script_editor.disconnect('editor_script_changed', Callable(self, '_on_script_changed'))
     remove_control_from_bottom_panel(bottom_panel)
 
 
@@ -290,7 +292,7 @@ func _ready():
 
 
 func _exit_tree():
-    disable_plugin()
+    _disable_plugin()
 
 
 func get_current_file():
@@ -307,11 +309,24 @@ func handle_activity(file, is_write=false):
         send_heartbeat(filepath, is_write)
 
 
+func _send_heartbeat(cmd_args):
+    if wakatime_cli == null:
+        wakatime_cli = get_wakatime_cli()
+
+    var output = []
+    var exit_code = OS.execute(wakatime_cli, cmd_args, output, true)
+    if debug:
+        if exit_code == -1:
+            pprint('Failed to send heartbeat: %s' % output)
+        else:
+            pprint('Heartbeat sent: %s' % output)
+
+
 func send_heartbeat(filepath, is_write):
     var python = settings.get(Settings.PYTHON_PATH)
     var wakatime_api_key = settings.get(Settings.WAKATIME_API_KEY)
 
-    var heartbeat = HeartBeat.new(filepath, OS.get_unix_time(), is_write)
+    var heartbeat = HeartBeat.new(filepath, Time.get_unix_time_from_system(), is_write)
     var cmd = ['--entity', heartbeat.filepath,
                '--key', wakatime_api_key,
                '--plugin', get_user_agent()]
@@ -338,13 +353,14 @@ func send_heartbeat(filepath, is_write):
             cmd.append('--exclude')
             cmd.append(exclude)
 
-    OS.execute(wakatime_cli, PoolStringArray(cmd), false, [])
+    var cmd_callable = Callable(self, '_send_heartbeat').bind(cmd)
+    WorkerThreadPool.add_task(cmd_callable)
 
     last_heartbeat = heartbeat
 
 
 func enough_time_has_passed(last_sent_time):
-    return OS.get_unix_time() - last_heartbeat.timestamp >= HeartBeat.FILE_MODIFIED_DELAY
+    return Time.get_unix_time_from_system() - last_heartbeat.timestamp >= HeartBeat.FILE_MODIFIED_DELAY
 
 
 # file changed
@@ -359,17 +375,17 @@ func _unhandled_key_input(ev):
 
 
 # file saved
-func save_external_data():
+func _save_external_data():
     var file = get_current_file()
     handle_activity(file, true)
 
 
 func open_api_key_modal():
-    var prompt = api_key_modal.instance()
+    var prompt = api_key_modal.instantiate()
     prompt.init(self)
     add_child(prompt)
     prompt.popup_centered()
-    yield(prompt, 'popup_hide')
+    await prompt.popup_hide
     prompt.queue_free()
 
 
@@ -382,10 +398,10 @@ func pprint_error(message):
 
 
 func get_user_agent():
-    return 'godot/%s %s/%s' % [get_engine_version(), get_plugin_name(), get_plugin_version()]
+    return 'godot/%s %s/%s' % [get_engine_version(), _get_plugin_name(), get_plugin_version()]
 
 
-func get_plugin_name():
+func _get_plugin_name():
     return 'godot-wakatime'
 
 
