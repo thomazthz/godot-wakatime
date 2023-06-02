@@ -2,7 +2,6 @@
 extends EditorPlugin
 
 const HeartBeat = preload('res://addons/wakatime/heartbeat.gd')
-const Settings = preload('res://addons/wakatime/settings.gd')
 
 const PLUGIN_PATH = 'res://addons/wakatime'
 const WAKATIME_ZIP_FILEPATH = '%s/wakatime.zip' % PLUGIN_PATH
@@ -10,16 +9,15 @@ const WAKATIME_ZIP_FILEPATH = '%s/wakatime.zip' % PLUGIN_PATH
 const WAKATIME_URL_FMT = 'https://github.com/wakatime/wakatime-cli/releases/download/v1.54.0/{wakatime_build}.zip'
 const DECOMPRESSOR_URL_FMT = 'https://github.com/ouch-org/ouch/releases/download/0.3.1/{ouch_build}'
 
+const MENU_ITEM_NAME = 'Wakatime API key'
+
 var last_heartbeat = HeartBeat.new()
 
 var wakatime_dir = null
 var wakatime_cli = null
 var decompressor_cli = null
 
-var api_key_modal = preload('res://addons/wakatime/api_key_modal.tscn')
-var bottom_panel_scn = preload('res://addons/wakatime/bottom_panel.tscn')
-var bottom_panel = null
-var settings = null
+const ApiKeyPrompt = preload('res://addons/wakatime/api_key_prompt.tscn')
 
 var is_windows = OS.has_feature('windows') or OS.has_feature('uwp')
 var is_linux = OS.has_feature('linux')
@@ -28,6 +26,7 @@ var is_amd64 = OS.has_feature('x86_64')
 var is_arm64 = OS.has_feature('arm64')
 
 var debug = false
+
 
 func get_wakatime_build():
     # Default system = Linux
@@ -119,16 +118,19 @@ func download_decompressor():
 
     var error = http.request(url)
     if error != OK:
+        disable_plugin()
         pprint_error('Failed to download decompression lib: %s' % error)
 
 
 func _decompressor_download_completed(result, status_code, headers, body):
     if result != HTTPRequest.RESULT_SUCCESS:
         pprint_error('Failed to download decompression lib')
+        disable_plugin()
         return
 
     if !has_decompression_lib():
         pprint_error('Failed to save decompression lib')
+        disable_plugin()
         return
 
     var decompressor = ProjectSettings.globalize_path(get_decompressor_cli())
@@ -152,11 +154,13 @@ func download_wakatime():
     var error = http.request(url)
     if error != OK:
         pprint_error('Failed to download Wakatime CLI: %s' % error)
+        disable_plugin()
 
 
 func _wakatime_download_completed(result, status_code, headers, body):
     if result != HTTPRequest.RESULT_SUCCESS:
         pprint_error('Failed to download Wakatime')
+        disable_plugin()
         return
 
     pprint('Wakatime download completed. Saved at %s' % WAKATIME_ZIP_FILEPATH)
@@ -178,11 +182,13 @@ func extract_files(source_file, output_dir):
     var error = OS.execute(decompressor, args, errors, true)
     if error:
         pprint_error(errors)
+        disable_plugin()
         return
 
     if has_wakatime_cli():
         pprint('Wakatime CLI installed at %s' % get_wakatime_cli())
     else:
+        disable_plugin()
         pprint_error('Failed to install Wakatime CLI')
 
     # Remove unnecessary files
@@ -216,75 +222,52 @@ func check_dependencies():
     if !has_decompression_lib():
         download_decompressor()
 
+func get_api_key():
+    var output = []
+    var err = OS.execute(get_wakatime_cli(), ['--config-read', 'api_key'], output)
+    if err == -1:
+        return null
 
-func check_old_plugin_version_installed():
-    var old_versions = ['wakatime-cli-10.1.0', 'wakatime-cli-10.2.1']
-    var directory = DirAccess.open('res://')
-    var version_installed = null
-    for cli_version in old_versions:
-        var wakatime_cli_dir = '%s/%s' % [PLUGIN_PATH, cli_version]
-        if directory.dir_exists(wakatime_cli_dir):
-            version_installed = wakatime_cli_dir
+    var api_key = output[0].strip_edges()
+    if api_key.is_empty():
+        return null
 
-    if version_installed == null:
-        return
-
-    pprint('Deleting old Wakatime CLI version: %s' % version_installed)
-    delete_recursive(version_installed)
+    return api_key
 
 
-func delete_recursive(path):
-    var directory = DirAccess.open(path)
-
-    var error = directory.get_open_error()
-    if error == OK:
-        directory.list_dir_begin()
-        var file_name = directory.get_next()
-        while file_name != '':
-            if directory.current_is_dir():
-                delete_recursive('%s/%s' % [path, file_name])
-            else:
-                directory.remove(file_name)
-            file_name = directory.get_next()
-
-        # Remove current path
-        directory.remove(path)
-    else:
-        pprint_error('Failed to remove %s' % path)
+func request_api_key():
+    var prompt = ApiKeyPrompt.instantiate()
+    _set_api_key_on_prompt(prompt, get_api_key())
+    _register_api_key_signals(prompt)
+    add_child(prompt)
+    prompt.popup_centered()
+    await prompt.popup_hide
+    prompt.queue_free()
 
 
 func setup_plugin():
-    pprint('Initializing %s plugin...' % get_user_agent())
-
-    check_old_plugin_version_installed()
+    pprint('Initializing %s plugin.' % get_user_agent())
 
     check_dependencies()
 
-    # Load all settings from .cfg file
-    settings = Settings.new()
-
-    # Check wakatime api key
-    var api_key = settings.get(Settings.WAKATIME_API_KEY)
-    if api_key == null or api_key == '':
-        open_api_key_modal()
+    var api_key = get_api_key()
+    if api_key == null:
+        request_api_key()
 
     await get_tree().process_frame
 
+    # Adds tool menu item command to open API key prompt
+    add_tool_menu_item(MENU_ITEM_NAME, request_api_key)
     # Register editor changed callback
     var script_editor = get_editor_interface().get_script_editor()
     script_editor.call_deferred('connect', 'editor_script_changed', Callable(self, '_on_script_changed'))
 
-    # Build Wakatime panel
-    bottom_panel = bottom_panel_scn.instantiate()
-    add_control_to_bottom_panel(bottom_panel, 'Wakatime')
-    bottom_panel.configure(self, settings)
-
 
 func _disable_plugin():
+    remove_tool_menu_item(MENU_ITEM_NAME)
     var script_editor = get_editor_interface().get_script_editor()
     if script_editor.is_connected('editor_script_changed', Callable(self, '_on_script_changed')):
         script_editor.disconnect('editor_script_changed', Callable(self, '_on_script_changed'))
-    remove_control_from_bottom_panel(bottom_panel)
 
 
 func _ready():
@@ -323,8 +306,10 @@ func _send_heartbeat(cmd_args):
 
 
 func send_heartbeat(filepath, is_write):
-    var python = settings.get(Settings.PYTHON_PATH)
-    var wakatime_api_key = settings.get(Settings.WAKATIME_API_KEY)
+    var wakatime_api_key = get_api_key()
+    if wakatime_api_key == null:
+        pprint_error('Failed to get API key')
+        return
 
     var heartbeat = HeartBeat.new(filepath, Time.get_unix_time_from_system(), is_write)
     var cmd = ['--entity', heartbeat.filepath,
@@ -334,24 +319,8 @@ func send_heartbeat(filepath, is_write):
     if is_write:
         cmd.append('--write')
 
-    if not settings.get(Settings.HIDE_PROJECT_NAME):
-        cmd.append('--project')
-        cmd.append(ProjectSettings.get('application/config/name'))
-
-    if settings.get(Settings.HIDE_FILENAMES):
-        cmd.append('--hide-file-names')
-
-    var includes = settings.get(Settings.INCLUDE)
-    if includes:
-        for include in includes:
-            cmd.append('--include')
-            cmd.append(include)
-
-    var excludes = settings.get(Settings.EXCLUDE)
-    if excludes:
-        for exclude in excludes:
-            cmd.append('--exclude')
-            cmd.append(exclude)
+    cmd.append('--project')
+    cmd.append(ProjectSettings.get('application/config/name'))
 
     var cmd_callable = Callable(self, '_send_heartbeat').bind(cmd)
     WorkerThreadPool.add_task(cmd_callable)
@@ -380,13 +349,49 @@ func _save_external_data():
     handle_activity(file, true)
 
 
-func open_api_key_modal():
-    var prompt = api_key_modal.instantiate()
-    prompt.init(self)
-    add_child(prompt)
-    prompt.popup_centered()
-    await prompt.popup_hide
+func _set_api_key_on_prompt(instance: PopupPanel, api_key):
+    if api_key == null:
+        api_key = ''
+    var text_edit = instance.get_node('vbox_container/hbox_container_top/line_edit')
+    text_edit.text = api_key
+
+
+func _register_api_key_signals(instance: PopupPanel):
+    var show_btn = instance.get_node('vbox_container/hbox_container_top/show_btn')
+    var save_btn = instance.get_node('vbox_container/hbox_container_bottom/save_btn')
+    var text_edit = instance.get_node('vbox_container/hbox_container_top/line_edit')
+
+    show_btn.connect('pressed', Callable(self, '_on_toggle_secret_text').bind(instance))
+    save_btn.connect('pressed', Callable(self, '_on_save_api_key').bind(instance))
+    instance.connect('popup_hide', Callable(self, '_on_popup_hide').bind(instance))
+
+
+func disable_plugin():
+    pprint_error('Disabling wakatime-godot plugin due some setup error. ' \
+                 + 'Check your internet connection and reload the plugin')
+    get_editor_interface().call_deferred('set_plugin_enabled', 'wakatime', false)
+
+
+func _on_popup_hide(prompt: PopupPanel):
     prompt.queue_free()
+
+
+func _on_toggle_secret_text(prompt: PopupPanel):
+    var text_edit = prompt.get_node('vbox_container/hbox_container_top/line_edit')
+    var show_btn = prompt.get_node('vbox_container/hbox_container_top/show_btn')
+
+    text_edit.secret = not text_edit.secret
+    show_btn.text = 'Show' if text_edit.secret else 'Hide'
+
+
+func _on_save_api_key(prompt: PopupPanel):
+    var text_edit = prompt.get_node('vbox_container/hbox_container_top/line_edit')
+    var api_key = text_edit.text.strip_edges()
+    var err = OS.execute(get_wakatime_cli(), ['--config-write', 'api_key=%s' % api_key])
+    if err == -1:
+        pprint_error('Failed to save API key')
+
+    prompt.visible = false
 
 
 func pprint(message):

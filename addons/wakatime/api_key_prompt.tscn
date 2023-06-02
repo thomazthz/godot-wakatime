@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://dbavhjsqdffsd"]
+
+[node name="api_key_modal" type="PopupPanel"]
+size = Vector2i(321, 100)
+visible = true
+
+[node name="vbox_container" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+theme_override_constants/separation = 25
+alignment = 1
+
+[node name="hbox_container_top" type="HBoxContainer" parent="vbox_container"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="line_edit" type="LineEdit" parent="vbox_container/hbox_container_top"]
+custom_minimum_size = Vector2(200, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter your Wakatime API Key"
+max_length = 43
+secret = true
+expand_to_text_length = true
+
+[node name="show_btn" type="Button" parent="vbox_container/hbox_container_top"]
+custom_minimum_size = Vector2(60, 25)
+layout_mode = 2
+text = "Show"
+
+[node name="hbox_container_bottom" type="HBoxContainer" parent="vbox_container"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+theme_override_constants/separation = 25
+alignment = 1
+
+[node name="save_btn" type="Button" parent="vbox_container/hbox_container_bottom"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+text = "Ok"
