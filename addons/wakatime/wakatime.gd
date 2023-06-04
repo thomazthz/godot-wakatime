@@ -9,7 +9,8 @@ const WAKATIME_ZIP_FILEPATH = '%s/wakatime.zip' % PLUGIN_PATH
 const WAKATIME_URL_FMT = 'https://github.com/wakatime/wakatime-cli/releases/download/v1.54.0/{wakatime_build}.zip'
 const DECOMPRESSOR_URL_FMT = 'https://github.com/ouch-org/ouch/releases/download/0.3.1/{ouch_build}'
 
-const MENU_ITEM_NAME = 'Wakatime API key'
+const API_KEY_MENU_ITEM_NAME = 'Wakatime API Key'
+const CONFIG_MENU_ITEM_NAME = 'Wakatime Config File'
 
 var last_heartbeat = HeartBeat.new()
 
@@ -91,6 +92,10 @@ func get_home_directory():
             return home
 
     return PLUGIN_PATH
+
+
+func get_config_filepath() -> String:
+    return '%s/.wakatime.cfg' % get_home_directory()
 
 
 func has_decompression_lib():
@@ -245,6 +250,10 @@ func request_api_key():
     prompt.queue_free()
 
 
+func open_config_file():
+    OS.shell_open(get_config_filepath())
+
+
 func setup_plugin():
     pprint('Initializing %s plugin.' % get_user_agent())
 
@@ -257,14 +266,17 @@ func setup_plugin():
     await get_tree().process_frame
 
     # Adds tool menu item command to open API key prompt
-    add_tool_menu_item(MENU_ITEM_NAME, request_api_key)
+    add_tool_menu_item(API_KEY_MENU_ITEM_NAME, request_api_key)
+    # Adds tool menu item command to open global WakaTime config file
+    add_tool_menu_item(CONFIG_MENU_ITEM_NAME, open_config_file)
     # Register editor changed callback
     var script_editor = get_editor_interface().get_script_editor()
     script_editor.call_deferred('connect', 'editor_script_changed', Callable(self, '_on_script_changed'))
 
 
 func _disable_plugin():
-    remove_tool_menu_item(MENU_ITEM_NAME)
+    remove_tool_menu_item(API_KEY_MENU_ITEM_NAME)
+    remove_tool_menu_item(CONFIG_MENU_ITEM_NAME)
     var script_editor = get_editor_interface().get_script_editor()
     if script_editor.is_connected('editor_script_changed', Callable(self, '_on_script_changed')):
         script_editor.disconnect('editor_script_changed', Callable(self, '_on_script_changed'))
