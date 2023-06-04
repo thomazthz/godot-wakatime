@@ -423,7 +423,7 @@ func _get_plugin_name():
 
 
 func get_plugin_version():
-    return '1.4.0'
+    return '1.5.0'
 
 
 func get_engine_version():
